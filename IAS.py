@@ -50,9 +50,13 @@ def main() -> None:
     read_entrada(ram)
     show_registradores()
     input("Pressione enter para prosseguir...\n")
-    for inst in ram:
-        if inst is not None:
-            interpreta(inst)
+    for i in range(len(ram)):
+        MAR.valor = PC.valor
+        MBR.valor = ram[MAR.valor]
+        IR.valor = MBR.valor
+        if IR.valor is not None:
+            interpreta(IR.valor)
+        PC.valor += 1
     print("fim do programa")
 
 def read_entrada(mem : list[str]):
