@@ -1,5 +1,7 @@
 from sys import argv
 
+comandos = open("comandos.txt", "r")
+
 class Registrador:
     nome: str
     valor: int|str
@@ -10,7 +12,7 @@ class Registrador:
         self.valor = valor
         self.tamanho = tam
 
-ram: list[int] = [None] * 256
+ram: list[str] = [None] * 256
 
 #USO GERAL
 A: Registrador = Registrador("A", 0, 40)
@@ -43,13 +45,29 @@ registradores: dict[str, Registrador] = {
     "N": N,
     "Z": Z
 }
-def main() -> None:
-    pass
 
-def interpreta(inst: str):
+def main() -> None:
+    read_entrada(ram)
+    show_registradores()
+    input("Pressione enter para prosseguir...\n")
+    for inst in ram:
+        if inst is not None:
+            interpreta(inst)
+    print("fim do programa")
+
+def read_entrada(mem : list[str]):
     '''
-    interpreta a instrução *inst* e executa um comando com base nela
+    lê o arquivo de entrada e carrega em *mem*
     '''
+    run = True
+    idx = 0
+    while run:
+        buffer = comandos.readline()
+        if buffer != "\n" and buffer != '' and buffer[0] != "#":
+            mem[idx] = buffer
+            idx+=1
+        if buffer == '':
+            run = False
 
 # Instruções do IAS -----------------------------------------------------------|
 
@@ -59,48 +77,94 @@ def load(arg: str) -> None:
     endereço de memória ou numero em enderecamento imediato
     '''
     pass
+    print("LOAD executed on "+ arg)
 
 def stor(mem: str):
     '''
     Guarda o conteudo do acumulador no endereco de memoria fornecido   
     '''
+    print("STOR+ executed on "+ mem)
 
 def jump(mem: str):
     '''
     Muda o registrador PC para o endereço fornecido
     '''
+    print("JUMP executed on "+ mem)
+
+def jump_plus(mem:str):
+    '''
+    muda registrador PC para o endereco fornecido caso o acumulador seja maior
+    que 0
+    '''
+    print("JUMP+ executed on "+ mem)
 
 def add(arg: str):
     '''
     Adiciona *arg* (endereçamento direto ou imediato) ao AC 
     '''
+    print("ADD executed on "+ arg)
 
 def sub(arg: str):
     '''
     Subtrai *arg* (endereçamento direto ou imediato) de AC
     '''
+    print("SUB executed on "+ arg)
 
 def mul(arg: str):
     '''
     Multiplica o conteudo de M por *arg* (endereçamento direto ou imediato)
     '''
+    print("MUL executed on "+ arg)
 
 def div(arg: str):
     '''
     Divide o conteudo de AC por *arg* (endereçamento direto ou imediato)
     '''
+    print("DIV executed on "+ arg)
 
 def lsh():
     '''
     Multiplica o conteudo de AC por 2
     '''
+    print("LSH executed")
 
 def rsh():
     '''
     Divide o conteudo de AC por 2
     '''
+    print("RSH executed")
 
 # Funções intermediárias -----------------------------------------------------|
+IAS_instructs = {"ADD" : add,
+                 "LOAD" : load,
+                 "STOR" : stor,
+                 "JUMP" : jump,
+                 "JUMP+" : jump_plus,
+                 "SUB" : sub,
+                 "MUL" : mul,
+                 "LSH" : lsh,
+                 "RSH" : rsh}
+
+def interpreta(inst: str):
+    '''
+    interpreta a instrução *inst* e executa um comando com base nela
+
+    '''
+
+    is_instruct = False
+    
+    if not (inst[0].isdigit() or inst[0] == '#'):
+        instruction = inst.split(" ")
+        if len(instruction) == 2:
+            process = IAS_instructs[instruction[0]]
+            process(instruction[1])
+        else:
+            if inst == "LSH\n":
+                lsh()
+            elif inst == "RSH\n":
+                rsh()
+        show_registradores()
+        input("Pressione enter para prosseguir...\n")
 
 def get_mem(mem: str) -> int|str:
     '''
@@ -113,8 +177,11 @@ def show_registradores():
     Imprime o conteudo de todos os registradores ao lado de seus respectivos
     nomes
     '''
+    print("registradores mostrados\n")
 
 def show_memoria():
     '''
     Imprime cada endereço de memoria seguido de seu conteudo
     '''
+
+main()
