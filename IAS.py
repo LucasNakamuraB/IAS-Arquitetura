@@ -67,11 +67,13 @@ def read_entrada(mem : list[str]):
     idx = 0
     while run:
         buffer = comandos.readline()
-        if buffer != "\n" and buffer != '' and buffer[0] != "#":
+        if buffer != '':
+            buffer = buffer.removesuffix("\n")
             mem[idx] = buffer
             idx+=1
         if buffer == '':
             run = False
+    print(mem)
 
 # Instruções do IAS -----------------------------------------------------------|
 
@@ -157,7 +159,9 @@ def interpreta(inst: str):
 
     is_instruct = False
     
-    if not (inst[0].isdigit() or inst[0] == '#'):
+    if inst == '':
+        return
+    if not (inst[0].isdigit() or inst[0] == '#' or inst[0] == "/n"):
         instruction = inst.split(" ")
         if len(instruction) == 2:
             process = IAS_instructs[instruction[0]]
@@ -176,11 +180,14 @@ def get_mem(mem: str) -> int|str:
     na memória, fazendo as operações descritas
     '''
 
+
 def show_registradores():
     '''
     Imprime o conteudo de todos os registradores ao lado de seus respectivos
     nomes
     '''
+    for nome, reg in registradores.items():
+        print(nome + "=" + str(reg.valor))
     print("registradores mostrados\n")
 
 def show_memoria():
