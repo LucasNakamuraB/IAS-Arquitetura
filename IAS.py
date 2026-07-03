@@ -1,6 +1,6 @@
 from sys import argv
 
-comandos = open("comandos.txt", "r")
+comandos = open("aaa.txt", "r")
 
 class Registrador:
     nome: str
@@ -12,7 +12,7 @@ class Registrador:
         self.valor = valor
         self.tamanho = tam
 
-ram: list[str] = [None] * 256
+ram: list[str] = ['0'] * 256
 
 #USO GERAL
 A: Registrador = Registrador("A", 0, 40)
@@ -50,13 +50,14 @@ def main() -> None:
     read_entrada(ram)
     show_registradores()
     input("Pressione enter para prosseguir...\n")
-    for i in range(len(ram)):
+    while PC.valor < 256:
         MAR.valor = PC.valor
         MBR.valor = ram[MAR.valor]
         IR.valor = MBR.valor
+        PC.valor += 1
         if IR.valor is not None:
             interpreta(IR.valor)
-        PC.valor += 1
+    print(ram)
     print("fim do programa")
 
 def read_entrada(mem : list[str]):
@@ -67,12 +68,19 @@ def read_entrada(mem : list[str]):
     idx = 0
     while run:
         buffer = comandos.readline()
-        if buffer != '':
-            buffer = buffer.removesuffix("\n")
-            mem[idx] = buffer
-            idx+=1
         if buffer == '':
             run = False
+        if buffer != '':
+            buffer = buffer.removesuffix("\n")
+            comm_i = buffer.find('#')
+            print(buffer)
+            if comm_i != -1:
+                buffer = buffer[0:comm_i]
+            if buffer == '':
+                buffer = '0'
+            mem[idx] = buffer
+            idx+=1
+        
     print(mem)
 
 # Instruções do IAS -----------------------------------------------------------|
@@ -82,19 +90,21 @@ def load(arg: str) -> None:
     carrega o acumulador com base em *arg*, com ele podendo ser um registrador,
     endereço de memória ou numero em enderecamento imediato
     '''
-    pass
-    print("LOAD executed on "+ arg)
+    AC.valor = int(get_mem(arg))
+    print('LOAD executed on ' + arg)
 
 def stor(mem: str):
     '''
     Guarda o conteudo do acumulador no endereco de memoria fornecido   
     '''
+    ram[int(mem[mem.find('(') + 1: mem.find(')')], 0)] = str(AC.valor)
     print("STOR+ executed on "+ mem)
 
 def jump(mem: str):
     '''
     Muda o registrador PC para o endereço fornecido
     '''
+    PC.valor = int(mem[mem.find('(') + 1: mem.find(')')], 0)
     print("JUMP executed on "+ mem)
 
 def jump_plus(mem:str):
@@ -102,42 +112,50 @@ def jump_plus(mem:str):
     muda registrador PC para o endereco fornecido caso o acumulador seja maior
     que 0
     '''
+    if AC.valor >0:
+        PC.valor = int(mem[mem.find('(') + 1: mem.find(')')], 0)
     print("JUMP+ executed on "+ mem)
 
 def add(arg: str):
     '''
     Adiciona *arg* (endereçamento direto ou imediato) ao AC 
     '''
+    AC.valor = AC.valor + int(get_mem(arg))
     print("ADD executed on "+ arg)
 
 def sub(arg: str):
     '''
     Subtrai *arg* (endereçamento direto ou imediato) de AC
     '''
+    AC.valor -= int(get_mem(arg))
     print("SUB executed on "+ arg)
 
 def mul(arg: str):
     '''
     Multiplica o conteudo de M por *arg* (endereçamento direto ou imediato)
     '''
+    M.valor = M.valor * int(get_mem(arg))
     print("MUL executed on "+ arg)
 
 def div(arg: str):
     '''
     Divide o conteudo de AC por *arg* (endereçamento direto ou imediato)
     '''
+    AC.valor = AC.valor // int(get_mem(arg))
     print("DIV executed on "+ arg)
 
 def lsh():
     '''
     Multiplica o conteudo de AC por 2
     '''
+    AC.valor = AC.valor * 2
     print("LSH executed")
 
 def rsh():
     '''
     Divide o conteudo de AC por 2
     '''
+    AC.valor = AC.valor//2
     print("RSH executed")
 
 # Funções intermediárias -----------------------------------------------------|
@@ -167,20 +185,29 @@ def interpreta(inst: str):
             process = IAS_instructs[instruction[0]]
             process(instruction[1])
         else:
-            if inst == "LSH\n":
+            if inst == "LSH":
                 lsh()
-            elif inst == "RSH\n":
+            elif inst == "RSH":
                 rsh()
         show_registradores()
         input("Pressione enter para prosseguir...\n")
 
-def get_mem(mem: str) -> int|str:
+def get_mem(mem: str) -> str:
     '''
     Recebe um endereço de memoria no formato M(X), -M(X) |M(X)| etc, e lê ele
     na memória, fazendo as operações descritas
     '''
-
-
+    is_neg = False
+    is_mod = False
+    if mem.isdigit():
+        return mem
+    else:
+        if mem[0] == '-':
+            is_neg = True
+        if mem.find('|') != -1:
+            is_mod = True
+        return ram[int(mem[mem.find('(') + 1: mem.find(')')], 0)]
+    
 def show_registradores():
     '''
     Imprime o conteudo de todos os registradores ao lado de seus respectivos
