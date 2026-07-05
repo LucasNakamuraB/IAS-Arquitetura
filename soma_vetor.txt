@@ -1,0 +1,62 @@
+# Algoritmo de livre escolha: soma dos N elementos de um vetor.
+# soma = 0; i = 0
+# enquanto i < N: soma = soma + vetor[i]; i = i + 1
+# resultado final armazenado no endereco 0x05 (soma)
+
+# Dados
+# 0x00 N
+5
+# 0x01 constante 1
+1
+# 0x02 i
+0
+# 0x03 addr_i (endereco do elemento atual)
+0
+# 0x04 elemento atual (A[i])
+0
+# 0x05 soma (resultado)
+0
+# 0x06 - 0x0F padding
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+# 0x10 - 0x14 vetor de entrada
+12
+7
+21
+3
+9
+
+# Endereco inicial da primeira instrucao
+0xA0
+
+LOAD AC, #0
+STORE 0x05, AC
+STORE 0x02, AC
+
+LOOP: LOAD AC, 0x02
+SUB AC, 0x00
+JUMPN CORPO
+JUMP FIM
+
+CORPO: LOAD AC, #0x10
+ADD AC, 0x02
+STORE 0x03, AC
+LOAD AC, @0x03
+STORE 0x04, AC
+LOAD AC, 0x05
+ADD AC, 0x04
+STORE 0x05, AC
+LOAD AC, 0x02
+ADD AC, 0x01
+STORE 0x02, AC
+JUMP LOOP
+
+FIM: HALT

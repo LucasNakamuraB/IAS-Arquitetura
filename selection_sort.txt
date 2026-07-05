@@ -1,0 +1,93 @@
+# Dados
+# 0x00 N
+5
+# 0x01 constante 1
+1
+# 0x02 i
+0
+# 0x03 j
+0
+# 0x04 min
+0
+# 0x05 temp
+0
+# 0x06 addr_i
+0
+# 0x07 addr_j
+0
+# 0x08 addr_min
+0
+# 0x09 temp2 (guarda A[j] durante a comparacao)
+0
+# 0x0A - 0x0F padding
+0
+0
+0
+0
+0
+0
+# 0x10 - 0x14 vetor a ser ordenado
+10
+3
+7
+2
+8
+
+# Endereco inicial da primeira instrucao
+0xA0
+
+LOOP_I: LOAD AC, 0x02
+SUB AC, 0x00
+JUMPN I_BODY
+JUMP FIM
+
+I_BODY: LOAD AC, 0x02
+STORE 0x04, AC
+LOAD AC, 0x02
+ADD AC, 0x01
+STORE 0x03, AC
+
+LOOP_J: LOAD AC, 0x03
+SUB AC, 0x00
+JUMPN J_BODY
+JUMP END_LOOP_J
+
+J_BODY: LOAD AC, #0x10
+ADD AC, 0x03
+STORE 0x07, AC
+LOAD AC, #0x10
+ADD AC, 0x04
+STORE 0x08, AC
+LOAD AC, @0x07
+STORE 0x09, AC
+LOAD AC, @0x08
+SUB AC, 0x09
+JUMPP UPDATE_MIN
+JUMP NEXT_J
+
+UPDATE_MIN: LOAD AC, 0x03
+STORE 0x04, AC
+
+NEXT_J: LOAD AC, 0x03
+ADD AC, 0x01
+STORE 0x03, AC
+JUMP LOOP_J
+
+END_LOOP_J: LOAD AC, #0x10
+ADD AC, 0x02
+STORE 0x06, AC
+LOAD AC, #0x10
+ADD AC, 0x04
+STORE 0x08, AC
+LOAD AC, @0x06
+STORE 0x05, AC
+LOAD AC, @0x08
+STORE @0x06, AC
+LOAD AC, 0x05
+STORE @0x08, AC
+LOAD AC, 0x02
+ADD AC, 0x01
+STORE 0x02, AC
+JUMP LOOP_I
+
+FIM: HALT

@@ -1,0 +1,66 @@
+SIMULADOR DO CICLO DE INSTRUCAO
+
+Participantes: Lucas Nakamura, RA143494; Vinícius Kondo, RA144029; Eduardo Maeda, RA108665
+
+
+COMO EXECUTAR
+--------------------------------------------------------------------
+No terminal, dentro da pasta do projeto:
+
+    python3 simulador.py <arquivo_de_entrada.txt>
+
+Exemplos incluidos:
+
+    python3 simulador.py entrada_selection_sort.txt
+    python3 simulador.py entrada_soma_vetor.txt
+
+O programa exibe o estado de todos os registradores antes da primeira
+instrucao e, em seguida, apos a execucao de cada instrucao. Pressione
+<ENTER> para avancar para a proxima instrucao.
+
+--------------------------------------------------------------------
+FORMATO DO ARQUIVO DE ENTRADA
+--------------------------------------------------------------------
+    # Dados
+    <valores inteiros, um por linha, armazenados a partir do endereco 0x00>
+
+    # Endereco inicial da primeira instrucao
+    0xAA
+
+    <instrucoes de linguagem de maquina, uma por linha>
+
+Regras:
+- Linhas que COMECAM com '#' sao comentarios e sao ignoradas.
+- Todas as linhas de dado (antes da linha que contem somente um
+  endereco hexadecimal, ex: 0xA0) sao armazenadas sequencialmente a
+  partir do endereco 0x00.
+- A linha contendo apenas um endereco hexadecimal define o PC inicial
+  e o endereco a partir do qual as instrucoes serao gravadas na
+  memoria (uma instrucao por posicao de memoria).
+- Rotulos (labels) podem ser usados para facilitar desvios. Formato:
+      ROTULO: INSTRUCAO operandos
+  O rotulo pode ser referenciado em JUMP/JUMPZ/JUMPN/JUMPP no lugar
+  de um endereco numerico.
+
+--------------------------------------------------------------------
+CONJUNTO DE INSTRUCOES (adaptado da maquina IAS)
+--------------------------------------------------------------------
+Modos de enderecamento do operando:
+    #valor    -> imediato
+    endereco  -> direto            (padrao, ex.: 0x05)
+    @endereco -> indireto          (MEM[MEM[endereco]])
+    A, B, AC  -> registrador
+
+Instrucoes:
+    LOAD  reg, operando        reg <- valor(operando)
+    STORE endereco, reg        MEM[endereco] <- reg   (endereco: direto @ ou indireto)
+    MOV   reg_dest, reg_orig   reg_dest <- reg_orig
+    ADD   reg, operando        reg <- reg + valor(operando)
+    SUB   reg, operando        reg <- reg - valor(operando)
+    MULT  reg, operando        reg <- reg * valor(operando)
+    DIV   reg, operando        reg <- reg // valor(operando); R <- resto
+    JUMP  endereco/rotulo      desvio incondicional
+    JUMPZ endereco/rotulo      desvia se Z == 1 (ultimo resultado foi zero)
+    JUMPN endereco/rotulo      desvia se N == 1 (ultimo resultado negativo)
+    JUMPP endereco/rotulo      desvia se resultado > 0
+    HALT                       encerra a execucao
